@@ -1,0 +1,12 @@
+
+include:
+  - db.yaml
+  - admin.yaml
+  - app.yaml
+  
+networks:
+  secure-net:
+    driver: bridge
+
+volumes:
+  db-data:
