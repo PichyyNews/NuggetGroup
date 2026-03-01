@@ -1,11 +1,11 @@
 services:
-  s{X}app:
-    image: strapi/strapi
-    container_name: 68-s{X}-app
+  s2app:
+    image: prawee/strapi
+    container_name: 67-s2-app
     restart: unless-stopped
     environment:
       DATABASE_CLIENT: postgres
-      DATABASE_HOST: s{X}db
+      DATABASE_HOST: s2db
       DATABASE_PORT: 5432
       DATABASE_NAME: ${DB_NAME}
       DATABASE_USERNAME: ${DB_USER}
@@ -15,4 +15,5 @@ services:
     networks:
       - secure-net
     depends_on:
-      - s{X}db
+      s2db:
+        condition: service_healthy
