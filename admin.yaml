@@ -1,7 +1,7 @@
 services:
-  s{X}admin:
+  s2admin:
     image: dpage/pgadmin4
-    container_name: 68-s{X}-admin
+    container_name: 67-s2-admin
     restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
@@ -11,4 +11,5 @@ services:
     networks:
       - secure-net
     depends_on:
-      - s{X}db
+      s2db:
+        condition: service_healthy
