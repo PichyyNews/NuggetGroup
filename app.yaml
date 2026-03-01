@@ -1,0 +1,18 @@
+services:
+  s{X}app:
+    image: strapi/strapi
+    container_name: 68-s{X}-app
+    restart: unless-stopped
+    environment:
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: s{X}db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${DB_NAME}
+      DATABASE_USERNAME: ${DB_USER}
+      DATABASE_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "1337:1337"
+    networks:
+      - secure-net
+    depends_on:
+      - s{X}db
