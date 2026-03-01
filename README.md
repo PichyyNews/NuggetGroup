@@ -46,3 +46,5 @@
 | **อภิชาติ ถีเจริญ** | s6702041510211@email.kmutnb.ac.th | รับผิดชอบส่วนของ Admin (pgAdmin) |
 | **ชวัลวิทย์ หมั่นถนอม** | ezmt011146@gmail.com | รับผิดชอบส่วนของ App (Strapi) |
 | **ฐนิชา สวนวงค์** | s6702041510059@email.kmutnb.ac.th | รับผิดชอบส่วนของ Database (PostgreSQL) |
+
+...
