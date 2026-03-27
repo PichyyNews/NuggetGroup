@@ -1,44 +1,66 @@
-# NuggetGroup Docker Infrastructure
+# NuggetGroup Network Stack
 
-โปรเจกต์นี้เป็นการตั้งค่าระบบ Infrastructure ด้วย Docker Compose สำหรับการรันระบบที่มีส่วนประกอบหลัก 3 ส่วน ได้แก่ Strapi App, PostgreSQL Database และ pgAdmin 
+This branch standardizes the project into a single `docker compose up -d` workflow with one public entry point on port `80`.
 
-## โครงสร้างระบบ (Architecture)
+## Architecture
 
-ระบบถูกตั้งค่าการทำงานแยกตามไฟล์เพื่อให้ง่ายต่อการจัดการ โดยประกอบด้วย 3 เซอร์วิสหลัก:
+The stack now has four services:
 
-- **`app.yaml` (s2app)**: แอปพลิเคชัน Strapi (Image: `prawee/strapi`) ทำหน้าที่เป็น Headless CMS สำหรับจัดการเนื้อหา
-- **`db.yaml` (s2db)**: ฐานข้อมูล PostgreSQL (Image: `postgres:15-alpine`) สำหรับเก็บข้อมูลของระบบ Strapi
-- **`admin.yaml` (s2admin)**: ระบบจัดการฐานข้อมูล pgAdmin (Image: `dpage/pgadmin4`) สำหรับดูแลและจัดการ PostgreSQL ผ่านหน้าเว็บ
+- `s2proxy`: Nginx reverse proxy published on host port `80`
+- `s2app`: Strapi application, available internally on port `1337`
+- `s2admin`: pgAdmin, available internally on port `80`
+- `s2db`: PostgreSQL, available only on the internal backend network
 
-## การเริ่มต้นใช้งาน (Getting Started)
+Traffic is routed through Nginx like this:
 
-### สิ่งที่ต้องมีเบื้องต้น
-- Docker
-- Docker Compose
+- `http://localhost/` -> Strapi
+- `http://localhost/admin` -> Strapi Admin
+- `http://localhost/pgadmin/` -> pgAdmin
 
-### ขั้นตอนการรันระบบ
+## Security Baseline
 
-1. คัดลอกไฟล์กำหนดค่า Environment ตัวอย่างและสร้างเป็นไฟล์ `.env` (หากยังไม่มี):
+The compose stack is prepared to be merged into `develop` with the following defaults:
+
+- only one host port is published: `80`
+- PostgreSQL is not exposed to the host
+- the database lives on an internal Docker network
+- runtime secrets are loaded from `.env`
+- pgAdmin runs with persistent storage and a preloaded server definition generated from `.env`
+- Nginx adds basic hardening headers and acts as the only public entry point
+
+Before deploying to any shared environment, replace all default passwords in `.env`.
+
+## Quick Start
+
+1. Create the environment file:
+
    ```bash
    cp .env.example .env
    ```
-   *หมายเหตุ: สามารถแก้ไขรหัสผ่านหรือตั้งค่าตัวแปรในไฟล์ `.env` ได้ตามความเหมาะสม*
 
-2. รันคำสั่งต่อไปนี้เพื่อเริ่มต้นระบบทั้งหมด:
+2. Update the credentials in `.env`.
+
+3. Start the full stack:
+
    ```bash
    docker compose up -d
    ```
-   *ระบบมีการตั้งค่า `healthcheck` สำหรับฐานข้อมูล ดังนั้น App และ Admin จะรอจนกว่า Database พร้อมใช้งานอย่างสมบูรณ์ จึงหมดปัญหาข้อผิดพลาดการเชื่อมต่อระหว่างเริ่มต้น*
 
-## การเข้าใช้งาน (Accessing the Services)
+4. Check container status:
 
-เมื่อระบบทำงานอย่างสมบูรณ์ สามารถเข้าถึงเซอร์วิสต่างๆ ได้ดังนี้:
+   ```bash
+   docker compose ps
+   ```
 
-- **Strapi Application**: [http://localhost:1337](http://localhost:1337)
-- **Strapi Admin Panel**: [http://localhost:1337/admin](http://localhost:1337/admin)
-- **pgAdmin Interface**: [http://localhost:5050](http://localhost:5050)
+## Access
 
-## ผู้จัดทำและผู้มีส่วนร่วม (Contributors)
+- Strapi: [http://localhost/](http://localhost/)
+- Strapi Admin: [http://localhost/admin](http://localhost/admin)
+- pgAdmin: [http://localhost/pgadmin/](http://localhost/pgadmin/)
+
+Use the pgAdmin credentials from `.env` to log in. The PostgreSQL server named `Nugget PostgreSQL` is generated automatically from the current `.env` values on startup. Enter the database password from `.env` when pgAdmin asks for the server password.
+
+## Notes For Review
 
 | ชื่อ - นามสกุล | อีเมล | ความรับผิดชอบ |
 | :--- | :--- | :--- |
