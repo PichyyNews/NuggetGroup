@@ -62,7 +62,11 @@ Use the pgAdmin credentials from `.env` to log in. The PostgreSQL server named `
 
 ## Notes For Review
 
-- `docker-compose.yaml` is now the single source of truth for the stack
-- the previous split files (`admin.yaml`, `app.yaml`, `db.yaml`) were removed to avoid drift
-- the database health check now validates against the actual PostgreSQL environment variables used inside the container
-- if you are migrating from an older local stack with an existing PostgreSQL volume and changed `DB_PASSWORD`, reinitialize once with `docker compose down -v`
+| ชื่อ - นามสกุล | อีเมล | ความรับผิดชอบ |
+| :--- | :--- | :--- |
+| **พิชญุตย์ สมบุญ** | s6702041510113@email.kmutnb.ac.th | เป็น รีดเดอร์ (Leader) และดูแลภาพรวม |
+| **อภิชาติ ถีเจริญ** | s6702041510211@email.kmutnb.ac.th | รับผิดชอบส่วนของ Admin (pgAdmin) |
+| **ชวัลวิทย์ หมั่นถนอม** | ezmt011146@gmail.com | รับผิดชอบส่วนของ App (Strapi) |
+| **ฐนิชา สวนวงค์** | s6702041510059@email.kmutnb.ac.th | รับผิดชอบส่วนของ Database (PostgreSQL) |
+
+...
