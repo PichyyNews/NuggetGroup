@@ -1,12 +1,108 @@
+name: nuggetgroup
 
-include:
-  - db.yaml
-  - admin.yaml
-  - app.yaml
-  
+services:
+  s2proxy:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      s2app:
+        condition: service_started
+      s2admin:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - edge
+    security_opt:
+      - no-new-privileges:true
+
+  s2app:
+    image: prawee/strapi
+    restart: unless-stopped
+    environment:
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: s2db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${DB_NAME:?DB_NAME is required}
+      DATABASE_USERNAME: ${DB_USER:?DB_USER is required}
+      DATABASE_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      HOST: 0.0.0.0
+      PORT: 1337
+    expose:
+      - "1337"
+    depends_on:
+      s2db:
+        condition: service_healthy
+    networks:
+      - edge
+      - backend
+    security_opt:
+      - no-new-privileges:true
+
+  s2admin:
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - /bootstrap/pgadmin-entrypoint.sh
+    environment:
+      DB_NAME: ${DB_NAME:?DB_NAME is required}
+      DB_USER: ${DB_USER:?DB_USER is required}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:?PGADMIN_EMAIL is required}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:?PGADMIN_PASSWORD is required}
+      PGADMIN_DISABLE_POSTFIX: "1"
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "True"
+      PGADMIN_REPLACE_SERVERS_ON_STARTUP: "True"
+      PGADMIN_SERVER_JSON_FILE: /var/lib/pgadmin/servers.json
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./pgadmin/pgadmin-entrypoint.sh:/bootstrap/pgadmin-entrypoint.sh:ro
+    expose:
+      - "80"
+    depends_on:
+      s2db:
+        condition: service_healthy
+    networks:
+      - edge
+      - backend
+    security_opt:
+      - no-new-privileges:true
+
+  s2db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:?DB_USER is required}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      POSTGRES_DB: ${DB_NAME:?DB_NAME is required}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - backend
+    security_opt:
+      - no-new-privileges:true
+
 networks:
-  secure-net:
+  edge:
     driver: bridge
+  backend:
+    driver: bridge
+    internal: true
 
 volumes:
   db-data:
+  pgadmin-data:
