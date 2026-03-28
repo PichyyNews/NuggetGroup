@@ -62,6 +62,7 @@ services:
       PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "True"
       PGADMIN_REPLACE_SERVERS_ON_STARTUP: "True"
       PGADMIN_SERVER_JSON_FILE: /var/lib/pgadmin/servers.json
+      SCRIPT_NAME: /pgadmin
     volumes:
       - pgadmin-data:/var/lib/pgadmin
       - ./pgadmin/pgadmin-entrypoint.sh:/bootstrap/pgadmin-entrypoint.sh:ro
